@@ -16,7 +16,7 @@ class data_faker:
 
     def genInt(self, start, end, iterate):
         fakeInt = self.faker.pyint(start, end, iterate)
-        return fakeInt
+        return str(fakeInt)
 
     def genUrl(self):
         fakeUrl = self.faker.image_url()
@@ -26,10 +26,6 @@ class data_faker:
         fakeActive = self.faker.pybool()
         return fakeActive
 
-    def genTicketId(self):
-        fakeTicket = self.faker.bothify(text="??##?-###???-?##?")
-        return fakeTicket
-
     def genDescription(self):
         fakeDescription = self.faker.paragraph(nb_sentences=1)
         return fakeDescription
@@ -37,3 +33,7 @@ class data_faker:
     def genDate(self):
         fakeDate = self.faker.date_between(datetime(2022, 1, 1))
         return str(fakeDate)
+
+    def genBothify(self, format):
+        fakeString = self.faker.bothify(text=format)
+        return fakeString
