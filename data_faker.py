@@ -37,3 +37,13 @@ class data_faker:
     def genBothify(self, format):
         fakeString = self.faker.bothify(text=format)
         return fakeString
+
+    def currentTime(self):
+        todayDate = ""
+        todayDate += datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-4]
+        todayDate += "+00"
+        return todayDate
+
+
+# df = data_faker()
+# print(df.todaysDate())

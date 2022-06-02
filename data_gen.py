@@ -19,7 +19,7 @@ class data_gen:
                     "name": self.faker.genName(),
                     "email": self.faker.genEmail(),
                     "avatar_url": self.faker.genUrl(),
-                    "active": True,
+                    "active": "yes",
                     "json": "{}",
                 }
             ]
@@ -29,6 +29,26 @@ class data_gen:
             # print(individual_id)
 
         return individual_id
+
+    def gen_states(self):
+        state_name = {0: "aBacklog", 1: "aIn Progress", 2: "aCompleted"}
+        for i in range(0, 3):
+            payload = [
+                {
+                    "id": f"{i}",
+                    "name": f"{state_name[i]}",
+                    "flow": "In Development",
+                    "position": i,
+                    "is_wip": "yes",
+                    "is_completed": "no",
+                    "is_committed": "no",
+                    "is_deleted": "no",
+                }
+            ]
+            response = self.sabi_sync.save_states(payload)
+            print(response)
+
+        return state_name
 
     def gen_tickets(self):
         ticket_id = {}
@@ -40,8 +60,8 @@ class data_gen:
                     "name": f"ticket{i}",
                     "description": self.faker.genDescription(),
                     "parent_id": "12",
-                    "created_at": self.faker.genDate(),
-                    "deleted": False,
+                    "created_at": self.faker.currentTime(),
+                    "deleted": "no",
                     "estimate": self.faker.genInt(1, 5, 1),
                     "type": "bug",
                     "project_id": "a2Rwz63dzvXLYxmZ",
@@ -62,20 +82,20 @@ class data_gen:
                     "ticket_id": ticket_id[f"ticket_id{i}"],
                     "individual_id": individual_id[f"ind_id{i}"],
                     "add_or_remove": "added",
-                    "datetime": "2022-05-23 13:32:30.48+00",
+                    "datetime": self.faker.currentTime(),
                 }
             ]
             response = self.sabi_sync.save_ticket_assignments(payload)
             print(response)
 
-    def set_state(self, ticket_id):
+    def set_state(self, ticket_id, state_name):
         for i in range(len(ticket_id)):
             payload = [
                 {
                     "ticket_id": ticket_id[f"ticket_id{i}"],
-                    "from_state": "State A",
-                    "to_state": "State B",
-                    "datetime": "2022-05-24 12:30:00.00+00",
+                    "from_state": f"{state_name[0]}",
+                    "to_state": f"{state_name[1]}",
+                    "datetime": self.faker.currentTime(),
                 }
             ]
             response = self.sabi_sync.save_ticket_status_changes(payload)
@@ -95,7 +115,7 @@ class data_gen:
             {
                 "id": "foo",
                 "name": "foo",
-                "is_custom": True,
+                "is_custom": "yes",
                 "type": "text",
                 "json": "{}",
             }
@@ -122,7 +142,7 @@ class data_gen:
                     "ticket_id": ticket_id[f"ticket_id{i}"],
                     "label_id": label_id[0]["id"],
                     "add_or_remove": "added",
-                    "datetime": "2022-05-24 13:30:00.00+00",
+                    "datetime": self.faker.currentTime(),
                 }
             ]
             response = self.sabi_sync.save_ticket_labels(payload)
