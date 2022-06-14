@@ -1,5 +1,7 @@
 from faker import Faker
-from datetime import datetime
+from datetime import datetime, timedelta
+import random
+import re
 
 
 class data_faker:
@@ -43,6 +45,58 @@ class data_faker:
         todayDate += datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-4]
         todayDate += "+00"
         return todayDate
+
+    def genRandomHour(self):
+        hourInt = random.randint(1, 3)
+        hour = hourInt
+        return hour
+
+    def addTimeString(self, currentTime, hour):
+        match = re.search(r"\d\d\d\d-", currentTime)
+        currentYear = int(match.group().strip("-"))
+        # print(currentYear)
+
+        match = re.search(r"-\d\d-", currentTime)
+        currentMonth = int(match.group().strip("-"))
+        # print(currentMonth)
+
+        match = re.search(r"-\d\d\s", currentTime)
+        currentDay = int(match.group().strip("-"))
+        # print(currentDay)
+
+        match = re.search(r"\s\d\d", currentTime)
+        currentHour = int(match.group())
+        # print(currentHour)
+
+        match = re.search(r":\d\d:", currentTime)
+        currentMinute = int(match.group().strip(":"))
+        # print(currentMinute)
+
+        match = re.search(r":\d\d\.", currentTime)
+        currentSecond = int(match.group().strip(":").strip("."))
+        # print(currentSecond)
+
+        currentHour += hour
+
+        if currentHour > 9:
+            newHour = " " + str(currentHour)
+            newTime = re.sub(r"\s\d\d", newHour, currentTime)
+        else:
+            newHour = " 0" + str(currentHour)
+            newTime = re.sub(r"\s\d\d", newHour, currentTime)
+        if currentHour >= 24:
+            currentDay += 1
+            currentHour = 0
+            newHour = " 0" + str(currentHour)
+            newTime = re.sub(r"\s\d\d", newHour, currentTime)
+            if currentDay > 9:
+                day = "-" + str(currentDay) + " "
+                newTime = re.sub(r"-\d\d\s", day, newTime)
+            else:
+                day = "-0" + str(currentDay) + " "
+                newTime = re.sub(r"-\d\d\s", day, newTime)
+        # print(newTime)
+        return newTime
 
 
 # df = data_faker()

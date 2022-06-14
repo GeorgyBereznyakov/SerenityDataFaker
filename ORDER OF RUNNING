@@ -1,0 +1,6 @@
+ORDER OF RUNNING:
+
+1: Smoke Test -> SabiTestAutomation Repo
+2: Faker1 -> This Repo
+3: Faker2 -> SabiTestAutomation Repo
+4: Faker3 -> This Repo
