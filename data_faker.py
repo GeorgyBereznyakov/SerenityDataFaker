@@ -41,8 +41,7 @@ class data_faker:
         return fakeString
 
     def currentTime(self):
-        todayDate = ""
-        todayDate += datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-4]
+        todayDate = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-4]
         todayDate += "+00"
         return todayDate
 
@@ -51,53 +50,16 @@ class data_faker:
         hour = hourInt
         return hour
 
-    def addTimeString(self, currentTime, hour):
-        match = re.search(r"\d\d\d\d-", currentTime)
-        currentYear = int(match.group().strip("-"))
-        # print(currentYear)
+    def setBackwards(self, time):
+        pTime = datetime.strptime(time, "%Y-%m-%d %H:%M:%S.%f+00")
+        dTime = pTime - timedelta(days=1)
+        sTime = datetime.strftime(dTime, "%Y-%m-%d %H:%M:%S.%f")[:-4]
+        sTime += "+00"
+        return sTime
 
-        match = re.search(r"-\d\d-", currentTime)
-        currentMonth = int(match.group().strip("-"))
-        # print(currentMonth)
-
-        match = re.search(r"-\d\d\s", currentTime)
-        currentDay = int(match.group().strip("-"))
-        # print(currentDay)
-
-        match = re.search(r"\s\d\d", currentTime)
-        currentHour = int(match.group())
-        # print(currentHour)
-
-        match = re.search(r":\d\d:", currentTime)
-        currentMinute = int(match.group().strip(":"))
-        # print(currentMinute)
-
-        match = re.search(r":\d\d\.", currentTime)
-        currentSecond = int(match.group().strip(":").strip("."))
-        # print(currentSecond)
-
-        currentHour += hour
-
-        if currentHour > 9:
-            newHour = " " + str(currentHour)
-            newTime = re.sub(r"\s\d\d", newHour, currentTime)
-        else:
-            newHour = " 0" + str(currentHour)
-            newTime = re.sub(r"\s\d\d", newHour, currentTime)
-        if currentHour >= 24:
-            currentDay += 1
-            currentHour = 0
-            newHour = " 0" + str(currentHour)
-            newTime = re.sub(r"\s\d\d", newHour, currentTime)
-            if currentDay > 9:
-                day = "-" + str(currentDay) + " "
-                newTime = re.sub(r"-\d\d\s", day, newTime)
-            else:
-                day = "-0" + str(currentDay) + " "
-                newTime = re.sub(r"-\d\d\s", day, newTime)
-        # print(newTime)
-        return newTime
-
-
-# df = data_faker()
-# print(df.todaysDate())
+    def addTime(self, time, hour):
+        pTime = datetime.strptime(time, "%Y-%m-%d %H:%M:%S.%f+00")
+        dTime = pTime + timedelta(hours=hour)
+        sTime = datetime.strftime(dTime, "%Y-%m-%d %H:%M:%S.%f")[:-4]
+        sTime += "+00"
+        return sTime

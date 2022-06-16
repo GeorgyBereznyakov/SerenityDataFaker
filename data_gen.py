@@ -8,14 +8,18 @@ class data_gen:
     def __init__(self):
         self.faker = data_faker()
         self.sabi_client = Common.get_clients_client()
-        self.sabi_sync = Common.get_sync_client(265)
+        foo = self.sabi_client.integrations("clubhouse")
+        for i in range(len(foo)):
+            if foo[i]["company_name"] == "SerenityTestAutomation":
+                x = foo[i]["company_integration_id"]
+        self.sabi_sync = Common.get_sync_client(x)
 
     def gen_individual(self):
         individual_id = {}
         for i in range(0, 10):
             payload = [
                 {
-                    "id": i + 1,
+                    "id": f"{i + 1}",
                     "name": self.faker.genName(),
                     "email": self.faker.genEmail(),
                     "avatar_url": self.faker.genUrl(),
@@ -35,8 +39,8 @@ class data_gen:
             0: "Backlog",
             1: "Scheduled",
             2: "In Progress",
-            3: "Ready for Review",
-            4: "Ready for Deploy",
+            3: "Review",
+            4: "Deploy",
             5: "Done",
         }
         type_name = {
@@ -66,13 +70,15 @@ class data_gen:
         ticket_id = {}
         for i in range(0, 10):
             link = self.faker.genBothify("???-####")
+            time = self.faker.currentTime()
+            yTime = self.faker.setBackwards(time)
             payload = [
                 {
                     "ticket_id": f"{i}",
                     "name": f"ticket{i}",
                     "description": self.faker.genDescription(),
-                    "parent_id": "12",
-                    "created_at": self.faker.currentTime(),
+                    "parent_id": "0",
+                    "created_at": yTime,
                     "deleted": "no",
                     "estimate": self.faker.genInt(1, 5, 1),
                     "type": "bug",
@@ -86,18 +92,20 @@ class data_gen:
 
         return ticket_id
 
-    def assign_tickets(self, ticket_id, individual_id, currentTime):
+    def assign_tickets(self, ticket_id, individual_id):
+        time = self.faker.currentTime()
+        yTime = self.faker.setBackwards(time)
         payload = [
             {
                 "ticket_id": f"{ticket_id}",
                 "individual_id": f"{individual_id}",
                 "add_or_remove": "added",
-                "datetime": currentTime,
+                "datetime": yTime,
             }
         ]
         response = self.sabi_sync.save_ticket_assignments(payload)
         print(response)
-        print(f"Ticket {ticket_id} assigned to Individual {individual_id} at {self.faker.currentTime()}")
+        print(f"Ticket {ticket_id} assigned to Individual {individual_id} at {yTime}")
 
     def set_state(self, ticket_id, currentState, nextState, time):
         payload = [
@@ -111,6 +119,19 @@ class data_gen:
         response = self.sabi_sync.save_ticket_status_changes(payload)
         print(response)
         print(f"Ticket {ticket_id} changed State from {currentState} to {nextState} at Time {time}")
+
+    def set_state2(self, ticket_id, currentState, nextState):
+        payload = [
+            {
+                "ticket_id": ticket_id,
+                "from_state": currentState,
+                "to_state": nextState,
+                "datetime": self.faker.currentTime(),
+            }
+        ]
+        response = self.sabi_sync.save_ticket_status_changes(payload)
+        print(response)
+        print(f"Ticket {ticket_id} changed State from {currentState} to {nextState} at Time {self.faker.currentTime()}")
 
     def get_tickets(self, ticket_id):
         for i in range(len(ticket_id)):
