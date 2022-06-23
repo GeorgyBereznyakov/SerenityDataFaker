@@ -52,7 +52,7 @@ class data_faker:
 
     def setBackwards(self, time):
         pTime = datetime.strptime(time, "%Y-%m-%d %H:%M:%S.%f+00")
-        dTime = pTime - timedelta(days=1)
+        dTime = pTime - timedelta(days=7)
         sTime = datetime.strftime(dTime, "%Y-%m-%d %H:%M:%S.%f")[:-4]
         sTime += "+00"
         return sTime
@@ -61,5 +61,38 @@ class data_faker:
         pTime = datetime.strptime(time, "%Y-%m-%d %H:%M:%S.%f+00")
         dTime = pTime + timedelta(hours=hour)
         sTime = datetime.strftime(dTime, "%Y-%m-%d %H:%M:%S.%f")[:-4]
+        sTime += "+00"
+        return sTime
+
+    def checkDay(self, time):
+        day = datetime.strptime(time, "%Y-%m-%d %H:%M:%S.%f+00")
+        weekend = False
+        if day.weekday() == 5 or day.weekday() == 6:
+            weekend = True
+
+        while weekend:
+            day += timedelta(days=1)
+            if day.weekday() != 5 and day.weekday() != 6:
+                weekend = False
+
+        sTime = datetime.strftime(day, "%Y-%m-%d %H:%M:%S.%f")[:-4]
+        sTime += "+00"
+        return sTime
+
+    def check_work_time(self, time):
+        shift_time = datetime.strptime(time, "%Y-%m-%d %H:%M:%S.%f+00")
+        clock_off = False
+        if shift_time.hour < 9 or shift_time.hour > 17:
+            clock_off = True
+
+        while clock_off:
+            if shift_time.hour < 9:
+                shift_time += timedelta(hours=1)
+            if shift_time.hour > 17:
+                shift_time += timedelta(hours=16)
+            if shift_time.hour > 9 and shift_time.hour < 17:
+                clock_off = False
+
+        sTime = datetime.strftime(shift_time, "%Y-%m-%d %H:%M:%S.%f")[:-4]
         sTime += "+00"
         return sTime

@@ -12,34 +12,31 @@ def pickle_loader(filename):
 
 state_template = {
     0: {
-        0: "",
-        1: "Backlog",
-        2: "Scheduled",
+        0: "Backlog",
+        1: "Scheduled",
+        2: "In Progress",
+        3: "Review",
+        4: "Deploy",
+        5: "Done",
+    },
+    1: {
+        0: "Backlog",
+        1: "In Progress",
+        2: "Review",
         3: "In Progress",
         4: "Review",
         5: "Deploy",
         6: "Done",
     },
-    1: {
-        0: "",
-        1: "Backlog",
-        2: "In Progress",
-        3: "Ready for Review",
+    2: {
+        0: "Backlog",
+        1: "Scheduled",
+        2: "Backlog",
+        3: "Scheduled",
         4: "In Progress",
         5: "Review",
         6: "Deploy",
         7: "Done",
-    },
-    2: {
-        0: "",
-        1: "Backlog",
-        2: "Scheduled",
-        3: "Backlog",
-        4: "Scheduled",
-        5: "In Progress",
-        6: "Review",
-        7: "Deploy",
-        8: "Done",
     },
 }
 faker = data_faker()
@@ -52,7 +49,13 @@ for i in range(0, 3):
         {
             i: threading.Thread(
                 target=state_shift.startRun,
-                args=(individuals[f"ind_id{i}"], tickets[f"ticket_id{i}"], faker.genRandomHour(), state_template[i]),
+                args=(
+                    individuals[f"ind_id{i}"],
+                    tickets[f"ticket_id{i}"],
+                    faker.genRandomHour(),
+                    state_template[i],
+                    8,
+                ),
             )
         }
     )

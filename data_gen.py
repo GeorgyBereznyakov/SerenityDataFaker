@@ -9,6 +9,7 @@ class data_gen:
         self.faker = data_faker()
         self.sabi_client = Common.get_clients_client()
         foo = self.sabi_client.integrations("clubhouse")
+        # print(foo)
         for i in range(len(foo)):
             if foo[i]["company_name"] == "SerenityTestAutomation":
                 x = foo[i]["company_integration_id"]
@@ -54,7 +55,7 @@ class data_gen:
         for i in range(0, 6):
             payload = [
                 {
-                    "id": f"{i}",
+                    "id": state_name[i],
                     "name": state_name[i],
                     "flow": "DataFaker",
                     "position": i,
@@ -92,13 +93,13 @@ class data_gen:
 
         return ticket_id
 
-    def assign_tickets(self, ticket_id, individual_id):
+    def assign_tickets_yesterday(self, ticket_id, individual_id):
         time = self.faker.currentTime()
         yTime = self.faker.setBackwards(time)
         payload = [
             {
-                "ticket_id": f"{ticket_id}",
-                "individual_id": f"{individual_id}",
+                "ticket_id": ticket_id,
+                "individual_id": individual_id,
                 "add_or_remove": "added",
                 "datetime": yTime,
             }
@@ -106,6 +107,24 @@ class data_gen:
         response = self.sabi_sync.save_ticket_assignments(payload)
         print(response)
         print(f"Ticket {ticket_id} assigned to Individual {individual_id} at {yTime}")
+
+    def assign_tickets_now(self, ticket_id, individual_id):
+        time = self.faker.currentTime()
+        payload = [
+            {
+                "ticket_id": f"{ticket_id}",
+                "individual_id": f"{individual_id}",
+                "add_or_remove": "added",
+                "datetime": time,
+            }
+        ]
+        response = self.sabi_sync.save_ticket_assignments(payload)
+        print(response)
+        print(f"Ticket {ticket_id} assigned to Individual {individual_id} at {yTime}")
+
+    def testing_assign_tickets(self, payload):
+        response = self.sabi_sync.save_ticket_assignments(payload)
+        print(response)
 
     def set_state(self, ticket_id, currentState, nextState, time):
         payload = [
@@ -133,10 +152,18 @@ class data_gen:
         print(response)
         print(f"Ticket {ticket_id} changed State from {currentState} to {nextState} at Time {self.faker.currentTime()}")
 
+    def testing_set_state(self, payload):
+        response = self.sabi_sync.save_ticket_status_changes(payload)
+        print(response)
+
     def get_tickets(self, ticket_id):
         for i in range(len(ticket_id)):
             response = self.sabi_sync.get_ticket(ticket_id[f"ticket_id{i}"])
             print(response)
+
+    def get_ticket(self, ticket_id):
+        response = self.sabi_sync.get_ticket(ticket_id)
+        print(response)
 
     def get_fields(self):
         response = self.sabi_sync.get_fields()
@@ -179,3 +206,16 @@ class data_gen:
             ]
             response = self.sabi_sync.save_ticket_labels(payload)
             print(response)
+
+    def gen_project(self):
+        payload = [
+            {
+                "project_id": "1",
+                "name": "Faker",
+                "short_name": "fa",
+                "description": "blah blah",
+                "json": "{}",
+            }
+        ]
+        response = self.sabi_sync.save_projects(payload)
+        print(response)

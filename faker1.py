@@ -8,6 +8,7 @@ def pickle_dumper(filename, dict):
 
 
 test = data_gen()
+test.gen_project()
 individuals = test.gen_individual()
 pickle_dumper("fake_users.pickle", individuals)
 tickets = test.gen_tickets()
