@@ -9,14 +9,16 @@ class state_shift:
         faker = data_faker()
         currentTime = faker.currentTime()
         stateTime = faker.setBackwards(currentTime)
-        foo.assign_tickets_yesterday(ticket, individual)
+        j = 0
         for i in range(len(template)):
             if i + 1 == len(template):
                 break
+            foo.assign_tickets(ticket, individual[j], stateTime)
+            j += 1
+            if j == len(individual):
+                j = 0
             foo.set_state(ticket, template[i], template[i + 1], stateTime)
-            # foo.set_state2(ticket, template[i], template[i + 1])
             stateTime = faker.addTime(stateTime, hour)
             stateTime = faker.checkDay(stateTime)
             stateTime = faker.check_work_time(stateTime)
             time.sleep(10)
-            # time.sleep(hour * 3600)

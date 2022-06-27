@@ -2,6 +2,8 @@ from common import Common
 from data_faker import data_faker
 import time
 import json
+import random
+import pickle
 
 
 class data_gen:
@@ -14,6 +16,11 @@ class data_gen:
             if foo[i]["company_name"] == "SerenityTestAutomation":
                 x = foo[i]["company_integration_id"]
         self.sabi_sync = Common.get_sync_client(x)
+
+    def pickle_loader(self, filename):
+        with open(filename, "rb") as handle:
+            a = pickle.load(handle)
+        return a
 
     def gen_individual(self):
         individual_id = {}
@@ -67,29 +74,26 @@ class data_gen:
 
         return state_name
 
-    def gen_tickets(self):
-        ticket_id = {}
-        for i in range(0, 10):
-            link = self.faker.genBothify("???-####")
-            time = self.faker.currentTime()
-            yTime = self.faker.setBackwards(time)
-            payload = [
-                {
-                    "ticket_id": f"{i}",
-                    "name": f"ticket{i}",
-                    "description": self.faker.genDescription(),
-                    "parent_id": "0",
-                    "created_at": yTime,
-                    "deleted": "no",
-                    "estimate": self.faker.genInt(1, 5, 1),
-                    "type": "bug",
-                    "project_id": "a2Rwz63dzvXLYxmZ",
-                    "link": f"https://test_comp.atlassian.net/browse/{link}",
-                }
-            ]
-            response = self.sabi_sync.save_tickets(payload)
-            ticket_id.update({f"ticket_id{i}": payload[0]["ticket_id"]})
-            # print(response)
+    def gen_tickets(self, num, description):
+        link = self.faker.genBothify("???-####")
+        time = self.faker.currentTime()
+        yTime = self.faker.setBackwards(time)
+        payload = [
+            {
+                "ticket_id": f"{num}",
+                "name": f"ticket{num}",
+                "description": description,
+                "parent_id": "0",
+                "created_at": yTime,
+                "deleted": "no",
+                "estimate": self.faker.genInt(1, 5, 1),
+                "type": "bug",
+                "project_id": "a2Rwz63dzvXLYxmZ",
+                "link": f"https://test_comp.atlassian.net/browse/{link}",
+            }
+        ]
+        response = self.sabi_sync.save_tickets(payload)
+        ticket_id = payload[0]["ticket_id"]
 
         return ticket_id
 
@@ -108,23 +112,18 @@ class data_gen:
         print(response)
         print(f"Ticket {ticket_id} assigned to Individual {individual_id} at {yTime}")
 
-    def assign_tickets_now(self, ticket_id, individual_id):
-        time = self.faker.currentTime()
+    def assign_tickets(self, ticket_id, individual_id, time):
         payload = [
             {
-                "ticket_id": f"{ticket_id}",
-                "individual_id": f"{individual_id}",
+                "ticket_id": ticket_id,
+                "individual_id": individual_id,
                 "add_or_remove": "added",
                 "datetime": time,
             }
         ]
         response = self.sabi_sync.save_ticket_assignments(payload)
         print(response)
-        print(f"Ticket {ticket_id} assigned to Individual {individual_id} at {yTime}")
-
-    def testing_assign_tickets(self, payload):
-        response = self.sabi_sync.save_ticket_assignments(payload)
-        print(response)
+        print(f"Ticket {ticket_id} assigned to Individual {individual_id} at {time}")
 
     def set_state(self, ticket_id, currentState, nextState, time):
         payload = [
@@ -219,3 +218,31 @@ class data_gen:
         ]
         response = self.sabi_sync.save_projects(payload)
         print(response)
+
+    def pick_template(self, state_template):
+        index, ticket_template = random.choice(list(state_template.items()))
+        return ticket_template, index
+
+    def pick_individual(self):
+        individuals = self.pickle_loader("fake_users.pickle")
+        ticket_individuals = {}
+        for i in range(3):
+            ticket_individuals.update(
+                {i: random.choice(list(individuals.values()))},
+            )
+        return ticket_individuals
+
+    def build_description(self, template, individuals, index):
+        description = f"Ticket State Template {index}: "
+
+        for i in range(len(template)):
+            description += template[i]
+            description += "->"
+
+        description += " Individuals assigned: "
+
+        for i in range(len(individuals)):
+            description += individuals[i]
+            description += ", "
+
+        return description

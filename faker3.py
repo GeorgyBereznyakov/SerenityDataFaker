@@ -1,14 +1,14 @@
 import pickle
 from data_faker import data_faker
+from data_gen import data_gen
 import threading
 from state_shift import state_shift
 
 
-def pickle_loader(filename):
-    with open(filename, "rb") as handle:
-        a = pickle.load(handle)
-    return a
 
+
+faker = data_faker()
+gen = data_gen()
 
 state_template = {
     0: {
@@ -39,21 +39,23 @@ state_template = {
         7: "Done",
     },
 }
-faker = data_faker()
-individuals = pickle_loader("fake_users.pickle")
-tickets = pickle_loader("fake_tickets.pickle")
 
 threads = {}
-for i in range(0, 3):
+
+for i in range(0, 8):
+    ticket_template, state_index = gen.pick_template(state_template)
+    ticket_individuals = gen.pick_individual()
+    description = gen.build_description(ticket_template, ticket_individuals, state_index)
+    ticket = gen.gen_tickets(i, description)
     threads.update(
         {
             i: threading.Thread(
                 target=state_shift.startRun,
                 args=(
-                    individuals[f"ind_id{i}"],
-                    tickets[f"ticket_id{i}"],
+                    ticket_individuals,
+                    ticket,
                     faker.genRandomHour(),
-                    state_template[i],
+                    ticket_template,
                     8,
                 ),
             )
