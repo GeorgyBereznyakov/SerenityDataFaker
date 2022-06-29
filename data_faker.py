@@ -46,7 +46,7 @@ class data_faker:
         return todayDate
 
     def genRandomHour(self):
-        hourInt = random.randint(1, 3)
+        hourInt = random.randint(1, 8)
         hour = hourInt
         return hour
 
@@ -82,13 +82,13 @@ class data_faker:
     def check_work_time(self, time):
         shift_time = datetime.strptime(time, "%Y-%m-%d %H:%M:%S.%f+00")
         clock_off = False
-        if shift_time.hour < 9 or shift_time.hour > 17:
+        if shift_time.hour < 9 or shift_time.hour >= 17:
             clock_off = True
 
         while clock_off:
             if shift_time.hour < 9:
                 shift_time += timedelta(hours=1)
-            if shift_time.hour > 17:
+            if shift_time.hour >= 17:
                 shift_time += timedelta(hours=16)
             if shift_time.hour > 9 and shift_time.hour < 17:
                 clock_off = False
