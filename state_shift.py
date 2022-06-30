@@ -21,4 +21,3 @@ class state_shift:
             stateTime = faker.addTime(stateTime, hour)
             stateTime = faker.checkDay(stateTime)
             stateTime = faker.check_work_time(stateTime)
-            time.sleep(10)

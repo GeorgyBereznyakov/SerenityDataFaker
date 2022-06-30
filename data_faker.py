@@ -90,7 +90,7 @@ class data_faker:
                 shift_time += timedelta(hours=1)
             if shift_time.hour >= 17:
                 shift_time += timedelta(hours=16)
-            if shift_time.hour > 9 and shift_time.hour < 17:
+            if shift_time.hour >= 9 and shift_time.hour < 17:
                 clock_off = False
 
         sTime = datetime.strftime(shift_time, "%Y-%m-%d %H:%M:%S.%f")[:-4]

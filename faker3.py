@@ -3,17 +3,21 @@ from data_faker import data_faker
 from data_gen import data_gen
 import threading
 from state_shift import state_shift
+import sys
+
+sys.path.append("/home/workspace/src/serenity_testing/")
+
+from get_ticket_num_faker import get_ticket_number
 
 """ 
 todo: 
-- get total tickets in company
-- add more templates
 - add code for custom work day
 """
 
 
 faker = data_faker()
 gen = data_gen()
+
 
 state_template = {
     0: {
@@ -107,29 +111,37 @@ state_template = {
     },
 }
 
-threads = {}
-j = 0
-for i in range(16, 24):
+# Gets number of tickets in system (0 if none)
+foo = get_ticket_number()
+ticket_amount = foo.get_num_tickets()
+tickets_to_add = ticket_amount + 8
+
+# threads = {}
+# j = 0
+for i in range(ticket_amount, tickets_to_add):
+    time_per_shift = faker.genRandomHour()
     ticket_template, state_index = gen.pick_template(state_template)
     ticket_individuals = gen.pick_individual()
-    description = gen.build_description(ticket_template, ticket_individuals, state_index)
+    description = gen.build_description(ticket_template, ticket_individuals, state_index, time_per_shift)
     ticket = gen.gen_tickets(i, description)
-    threads.update(
-        {
-            j: threading.Thread(
-                target=state_shift.startRun,
-                args=(
-                    ticket_individuals,
-                    ticket,
-                    faker.genRandomHour(),
-                    ticket_template,
-                    8,
-                ),
-            )
-        }
-    )
-    j += 1
+    state_shift.startRun(ticket_individuals, ticket, time_per_shift, ticket_template, 8)
+    # threads.update(
+    #     {
+    #         j: threading.Thread(
+    #             target=,
+    #             args=(
+    #                 ticket_individuals,
+    #                 ticket,
+    #                 time_per_shift,
+    #                 ticket_template,
+    #                 8,
+    #             ),
+    #         )
+    #     }
+    # )
+    # j += 1
 
-for i in range(len(threads)):
-    x = threads[i]
-    x.start()
+# for i in range(len(threads)):
+#     x = threads[i]
+#     x.start()
+#     x.join()

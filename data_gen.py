@@ -122,7 +122,6 @@ class data_gen:
             }
         ]
         response = self.sabi_sync.save_ticket_assignments(payload)
-        print(response)
         print(f"Ticket {ticket_id} assigned to Individual {individual_id} at {time}")
 
     def set_state(self, ticket_id, currentState, nextState, time):
@@ -135,7 +134,6 @@ class data_gen:
             }
         ]
         response = self.sabi_sync.save_ticket_status_changes(payload)
-        print(response)
         print(f"Ticket {ticket_id} changed State from {currentState} to {nextState} at Time {time}")
 
     def set_state2(self, ticket_id, currentState, nextState):
@@ -232,12 +230,14 @@ class data_gen:
             )
         return ticket_individuals
 
-    def build_description(self, template, individuals, index):
+    def build_description(self, template, individuals, index, time):
         description = f"Ticket State Template {index}: "
 
         for i in range(len(template)):
             description += template[i]
             description += "->"
+
+        description += f" Time Per State: {time} hours, "
 
         description += " Individuals assigned: "
 
