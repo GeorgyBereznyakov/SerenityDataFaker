@@ -12,6 +12,8 @@ from get_ticket_num_faker import get_ticket_number
 """ 
 todo: 
 - add code for custom work day
+- batch tickets
+- 
 """
 
 
@@ -114,34 +116,28 @@ state_template = {
 # Gets number of tickets in system (0 if none)
 foo = get_ticket_number()
 ticket_amount = foo.get_num_tickets()
-tickets_to_add = ticket_amount + 8
-
+tickets_to_add = ticket_amount + 1000
+tickets = []
+state_map = {}
+individuals_map = {}
+time_map = {}
 # threads = {}
 # j = 0
 for i in range(ticket_amount, tickets_to_add):
     time_per_shift = faker.genRandomHour()
+    time_map.update({i: time_per_shift})
     ticket_template, state_index = gen.pick_template(state_template)
-    ticket_individuals = gen.pick_individual()
-    description = gen.build_description(ticket_template, ticket_individuals, state_index, time_per_shift)
-    ticket = gen.gen_tickets(i, description)
-    state_shift.startRun(ticket_individuals, ticket, time_per_shift, ticket_template, 8)
-    # threads.update(
-    #     {
-    #         j: threading.Thread(
-    #             target=,
-    #             args=(
-    #                 ticket_individuals,
-    #                 ticket,
-    #                 time_per_shift,
-    #                 ticket_template,
-    #                 8,
-    #             ),
-    #         )
-    #     }
-    # )
-    # j += 1
+    state_map.update({i: ticket_template})
+    individual_amount = faker.genRandomInt()
+    ticket_individuals = gen.pick_individual(individual_amount)
+    individuals_map.update({i: ticket_individuals})
+    description = gen.build_description(
+        ticket_template,
+        ticket_individuals,
+        state_index,
+        time_per_shift,
+    )
+    tickets = gen.build_ticket_payload(i, description, tickets)
+ticket_id = gen.gen_tickets(tickets)
 
-# for i in range(len(threads)):
-#     x = threads[i]
-#     x.start()
-#     x.join()
+state_shift.startRun(individuals_map, ticket_id, time_map, state_map, gen, faker, ticket_amount)

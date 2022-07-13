@@ -49,6 +49,10 @@ class data_faker:
         hourInt = random.randint(1, 8)
         hour = hourInt
         return hour
+    
+    def genRandomInt(self):
+        foo = random.randint(1, 5)
+        return foo
 
     def setBackwards(self, time):
         pTime = datetime.strptime(time, "%Y-%m-%d %H:%M:%S.%f+00")

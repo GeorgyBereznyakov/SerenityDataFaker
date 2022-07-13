@@ -15,16 +15,18 @@ class data_gen:
         for i in range(len(foo)):
             if foo[i]["company_name"] == "SerenityTestAutomation":
                 x = foo[i]["company_integration_id"]
-        self.sabi_sync = Common.get_sync_client(x)
+                self.sabi_sync = Common.get_sync_client(x)
+                break
 
     def pickle_loader(self, filename):
         with open(filename, "rb") as handle:
             a = pickle.load(handle)
+            handle.close()
         return a
 
     def gen_individual(self):
         individual_id = {}
-        for i in range(0, 10):
+        for i in range(0, 20):
             payload = [
                 {
                     "id": f"{i + 1}",
@@ -74,26 +76,11 @@ class data_gen:
 
         return state_name
 
-    def gen_tickets(self, num, description):
-        link = self.faker.genBothify("???-####")
-        time = self.faker.currentTime()
-        yTime = self.faker.setBackwards(time)
-        payload = [
-            {
-                "ticket_id": f"{num}",
-                "name": f"ticket{num}",
-                "description": description,
-                "parent_id": "0",
-                "created_at": yTime,
-                "deleted": "no",
-                "estimate": self.faker.genInt(1, 5, 1),
-                "type": "bug",
-                "project_id": "a2Rwz63dzvXLYxmZ",
-                "link": f"https://test_comp.atlassian.net/browse/{link}",
-            }
-        ]
+    def gen_tickets(self, payload):
+        ticket_id = {}
         response = self.sabi_sync.save_tickets(payload)
-        ticket_id = payload[0]["ticket_id"]
+        for i in range(len(payload)):
+            ticket_id.update({i: payload[i]["ticket_id"]})
 
         return ticket_id
 
@@ -112,29 +99,11 @@ class data_gen:
         print(response)
         print(f"Ticket {ticket_id} assigned to Individual {individual_id} at {yTime}")
 
-    def assign_tickets(self, ticket_id, individual_id, time):
-        payload = [
-            {
-                "ticket_id": ticket_id,
-                "individual_id": individual_id,
-                "add_or_remove": "added",
-                "datetime": time,
-            }
-        ]
+    def assign_tickets(self, payload):
         response = self.sabi_sync.save_ticket_assignments(payload)
-        print(f"Ticket {ticket_id} assigned to Individual {individual_id} at {time}")
 
-    def set_state(self, ticket_id, currentState, nextState, time):
-        payload = [
-            {
-                "ticket_id": ticket_id,
-                "from_state": currentState,
-                "to_state": nextState,
-                "datetime": time,
-            }
-        ]
+    def set_state(self, payload):
         response = self.sabi_sync.save_ticket_status_changes(payload)
-        print(f"Ticket {ticket_id} changed State from {currentState} to {nextState} at Time {time}")
 
     def set_state2(self, ticket_id, currentState, nextState):
         payload = [
@@ -221,13 +190,18 @@ class data_gen:
         index, ticket_template = random.choice(list(state_template.items()))
         return ticket_template, index
 
-    def pick_individual(self):
+    def pick_individual(self, num):
         individuals = self.pickle_loader("fake_users.pickle")
+        pop_individuals = individuals
         ticket_individuals = {}
-        for i in range(3):
+
+        for i in range(num):
+            choice = random.choice(list(pop_individuals.keys()))
+            temp = pop_individuals[choice]
             ticket_individuals.update(
-                {i: random.choice(list(individuals.values()))},
+                {i: temp},
             )
+            pop_individuals.pop(choice)
         return ticket_individuals
 
     def build_description(self, template, individuals, index, time):
@@ -246,3 +220,43 @@ class data_gen:
             description += ", "
 
         return description
+
+    def batch_payload(self, payload, temp):
+        payload.append(temp)
+        return payload
+
+    def build_ticket_payload(self, num, description, payload):
+        link = self.faker.genBothify("???-####")
+        time = self.faker.currentTime()
+        yTime = self.faker.setBackwards(time)
+        temp = {
+            "ticket_id": f"{num}",
+            "name": f"ticket{num}",
+            "description": description,
+            "parent_id": "0",
+            "created_at": yTime,
+            "deleted": "no",
+            "estimate": self.faker.genInt(1, 5, 1),
+            "type": "bug",
+            "project_id": "a2Rwz63dzvXLYxmZ",
+            "link": f"https://test_comp.atlassian.net/browse/{link}",
+        }
+        return self.batch_payload(payload, temp)
+
+    def build_assign_payload(self, ticket, individual, stateTime, payload):
+        temp = {
+            "ticket_id": ticket,
+            "individual_id": individual,
+            "add_or_remove": "added",
+            "datetime": stateTime,
+        }
+        return self.batch_payload(payload, temp)
+
+    def build_state_payload(self, ticket, currentState, nextState, time, payload):
+        temp = {
+            "ticket_id": ticket,
+            "from_state": currentState,
+            "to_state": nextState,
+            "datetime": time,
+        }
+        return self.batch_payload(payload, temp)
