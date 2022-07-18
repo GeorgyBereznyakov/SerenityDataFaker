@@ -45,18 +45,13 @@ class data_faker:
         todayDate += "+00"
         return todayDate
 
-    def genRandomHour(self):
-        hourInt = random.randint(1, 8)
-        hour = hourInt
-        return hour
-    
-    def genRandomInt(self):
-        foo = random.randint(1, 5)
+    def genRandomInt(self, min, max):
+        foo = random.randint(min, max)
         return foo
 
     def setBackwards(self, time):
         pTime = datetime.strptime(time, "%Y-%m-%d %H:%M:%S.%f+00")
-        dTime = pTime - timedelta(days=7)
+        dTime = pTime - timedelta(days=self.genRandomInt(7, 21))
         sTime = datetime.strftime(dTime, "%Y-%m-%d %H:%M:%S.%f")[:-4]
         sTime += "+00"
         return sTime
